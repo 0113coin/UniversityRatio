@@ -1,9 +1,11 @@
 import requests
 from bs4 import BeautifulSoup
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import streamlit as st
 import pandas as pd
+
+index = []
+data = []
+임시 = []
 
 # 크롤링할 웹 페이지 URL 설정
 url1 = 'https://addon.jinhakapply.com/RatioV1/RatioH/Ratio10190361.html'  # 가천대 url
@@ -41,8 +43,14 @@ if response.status_code == 200:
             td_elements = tr_element.find_all('td', class_='rate4') 
                         
             for n in td_elements:
-
+                임시.append(n.text.strip())
                 print(n.text.strip())
+        
+        index.append('가천대 SW')
+        data.append(임시[0])
+        index.append('가천대 AI')
+        data.append(임시[1])
+
     else:
         print("id가 'SelType436'인 <div> 요소를 찾을 수 없습니다.")
 else:
@@ -57,13 +65,13 @@ if response.status_code == 200:
     Unist_Ratio = Unist_Ratio.find('b')
     
     유니스트_경쟁률 = Unist_Ratio.text.strip()
-    
-    print(f"UNIST 특기자 전형 경쟁률 : {유니스트_경쟁률}")
-    
+    index.append('UNIST')
+    data.append(유니스트_경쟁률)
     
 else:
     print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
-    
+
+#GIST
 url3 = 'https://ratio.uwayapply.com/Sl5KMCYlclZKXiUmOiZKemZUZg=='  # DGIST url
 response = requests.get(url3, verify=False)
 
@@ -72,36 +80,58 @@ if response.status_code == 200:
     DGIST_Ratio = soup.find('tr', class_='trFieldValue', id='Tr_00E_0')
     DGIST_Ratio = DGIST_Ratio.find('b')
     디지스트_경쟁률 = DGIST_Ratio.text.strip()
-    print(f"DGIST 특기자 전형 경쟁률 : {디지스트_경쟁률}") 
-    
-    
+    print(f"DGIST 특기자 전형 경쟁률 : {디지스트_경쟁률}")
+    index.append("DGIST")
+    data.append(디지스트_경쟁률)
+
 else:
     print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
     
-
-#고려대
-url5 = 'https://ratio.uwayapply.com/Sl5KOGB9YTlKZiUmOiZKemZUZg=='  # 고려대 url
+url5 = 'https://ratio.uwayapply.com/Sl5KMCYlckpeJSY6Jkp6ZlRm'
 response = requests.get(url5, verify=False)
 
 if response.status_code == 200:
     soup = BeautifulSoup(response.text, 'html.parser')
-    고려대_Ratio = soup.find('tr', class_='trFieldValue', id='Tr_0150_000320000') #건축학과
-    #td_instances = tr_instances.find('td')
-    Ratio = 고려대_Ratio.find('b')
-    
-    ALL_Ratio = 고려대_Ratio.find_all('b')
-    
-    고려대_건축학과_경쟁률 = Ratio.text.strip()
-    
-    print(f"고려대 건축학과 경쟁률 : {Ratio.text.strip()}") 
-    
+    GIST_Ratio = soup.find('tr', class_='trFieldValue', id='Tr_00EUA02_50_0')
+    List = GIST_Ratio.find_all('td',rowspan=1, class_='txtFieldValue')
+    Ratio = List[3]
+    지스트_특기자_경쟁률 = Ratio.text.strip()
+    index.append("GIST")
+    data.append(지스트_특기자_경쟁률)
     
 else:
     print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
-    
-name = ['UNIST 특기자 경쟁률','DGIST 특기자 경쟁률','고려대 건축학과 경쟁률']
-data = [유니스트_경쟁률,디지스트_경쟁률,고려대_건축학과_경쟁률]
 
-df = pd.DataFrame(data=data,index=name)
+#한밭대
+url5 = 'https://addon.jinhakapply.com/RatioV1/RatioH/Ratio30040391.html'
+response = requests.get(url5)
+
+if response.status_code == 200:
+    soup = BeautifulSoup(response.text, 'html.parser')
+    base = soup.find('div', id='SelType423')
+    target_major = base.find_all('td',class_='unit')
+    for n in target_major:
+        if n.text.strip() == '인공지능소프트웨어학과':
+            index_content = base.find('strong')
+            data_content = base.find('td',class_='rate2',rowspan='1').text.strip()
+            index.append(index_content)
+            data.append(data_content)
+            
+        else:   
+            pass
+
+    
+else:
+    print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
+
+#한밭대
+url5 = 'https://addon.jinhakapply.com/RatioV1/RatioH/Ratio30040391.html'
+response = requests.get(url5, verify=False)
+
+
+
+
+column = ['경쟁률']
+df = pd.DataFrame(data=data,index=index,columns=column)
 print(df)
 st.dataframe(df)
