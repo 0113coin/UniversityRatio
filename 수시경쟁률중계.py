@@ -124,9 +124,35 @@ if response.status_code == 200:
 else:
     print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
 
-#한밭대
-url5 = 'https://addon.jinhakapply.com/RatioV1/RatioH/Ratio30040391.html'
-response = requests.get(url5, verify=False)
+#한국기술교육대
+url5 = 'https://ratio.uwayapply.com/Sl5KfExgMDhgfWE5SmYlJjomSnpmVGY='
+response = requests.get(url5,verify=False)
+
+if response.status_code == 200:
+    soup = BeautifulSoup(response.text, 'html.parser')
+    
+    base = soup.find('tr',class_='trFieldValue',id='Tr_0012_000040000')
+    target_major = base.find('td',rowspan = '1', colspan = '2' ,class_='txtFieldValue', align = 'left')
+    index.append('한기대 종합 : 창의인재 컴공')
+    Ratio = base.find('b')
+    data.append(Ratio.text.strip())
+    
+    base = soup.find('tr',class_='trFieldValue',id='Tr_0017_000140000')
+    target_major = base.find('td',rowspan = '1', colspan = '2' ,class_='txtFieldValue', align = 'left')
+    index.append('한기대 종합 : 지역인재 컴공')
+    Ratio = base.find('b')
+    data.append(Ratio.text.strip())
+    
+    base = soup.find('tr',class_='trFieldValue',id='Tr_0001_000640000')
+    target_major = base.find('td',rowspan = '1', colspan = '2' ,class_='txtFieldValue', align = 'left')
+    index.append('한기대 교과 : 일반 컴공')
+    Ratio = base.find('b')
+    data.append(Ratio.text.strip())
+            
+        
+    
+else:
+    print("웹 페이지에 접근할 수 없습니다. 상태 코드:", response.status_code)
 
 
 
